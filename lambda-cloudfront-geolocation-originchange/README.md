@@ -8,6 +8,7 @@ https://aws.amazon.com/about-aws/whats-new/2020/07/cloudfront-geolocation-header
 - [https://docs.aws.amazon.com/ko_kr/AmazonCloudFront/latest/DeveloperGuide/using-cloudfront-headers.html#cloudfront-headers-viewer-location](https://docs.aws.amazon.com/ko_kr/AmazonCloudFront/latest/DeveloperGuide/using-cloudfront-headers.html#cloudfront-headers-viewer-location)
 
 ## Architecture
+![lambda-cloudfront-geolocation-originchange_Architect](https://user-images.githubusercontent.com/47586500/90101863-6e082e80-dd7a-11ea-8e23-facaadc5b9b9.png)
 - Origin request 시 CloudFront-Viewer-Country header 의 value 를 이용
 - header value 가 KR 이 아닌 경우 us-east-1 EC2 Instance 를 Origin 으로 변경
 - header value 가 KR 인 경우 pass (Default origin)
@@ -20,7 +21,8 @@ https://aws.amazon.com/about-aws/whats-new/2020/07/cloudfront-geolocation-header
 1. Virginia 와 Seoul region 에 각각 Web service EC2  Instance 를 Public network 로 구성 하여 Public DNS 정보를 복사합니다.
 2. Seoul region 의 EC2 Instance Public DNS 를 CloudFront distribution 의 Origin 으로 설정 합니다.
 
-    ![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/5da8907d-00b0-4718-a89b-e4efa26addc3/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/5da8907d-00b0-4718-a89b-e4efa26addc3/Untitled.png)
+
+    ![lambda-cloudfront-geolocation-originchange_step1](https://user-images.githubusercontent.com/47586500/90101886-752f3c80-dd7a-11ea-8b5e-c742b3ce8ad3.png)
 
 ## Step 2. IAM Role 생성
 
@@ -92,7 +94,7 @@ Lambda function 실행을 위한 IAM Role 을 생성 합니다.
     - Runtime = Python 3.8
     - Use an existing role = AWSLamgdaEdgeRole
 
-        ![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/09477aee-48b8-4b68-824d-a94f9881d571/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/09477aee-48b8-4b68-824d-a94f9881d571/Untitled.png)
+        ![lambda-cloudfront-geolocation-originchange_step3 1](https://user-images.githubusercontent.com/47586500/90101905-7ceee100-dd7a-11ea-8f95-0b46b1fd2536.png)
 
 4. Create function 선택 합니다.
 
@@ -126,7 +128,7 @@ Lambda management console 에서  생성한 ViewerGeoTurnOrigin function 에 **l
                 custom_origin = {
                     "custom": {
                         "customHeaders": {},
-                        "domainName": "ec2-54-87-200-95.compute-1.amazonaws.com",   # AWS Virginia EC2 Instance
+                        "domainName": "",  #TODO Input this field for changed origin domain 
                         "keepaliveTimeout": 5,
                         "path": "",
                         "port": 80,
@@ -170,7 +172,7 @@ CloudFront 에 Lambda function 을 배포하기위해 Version 을 생성 해야 
 
 1. Lambda function management console 에서 Actions 버튼을 눌러 **Publish new version** 메뉴를 선택하고, 팝업 화면에서 Publish 를 선택 합니다.
 
-    ![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/4ad249ff-6e5a-4632-bf91-07c5f499cdaf/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/4ad249ff-6e5a-4632-bf91-07c5f499cdaf/Untitled.png)
+    ![lambda-cloudfront-geolocation-originchange_step3 3](https://user-images.githubusercontent.com/47586500/90101907-7d877780-dd7a-11ea-94e6-be41e46768a2.png)
 
 2. 새로 생성된 버전의 ARN 을 복사 합니다.
 
@@ -186,7 +188,7 @@ CloudFront viewer geolocation headers 를 사용하기위해 Origin Request Poli
 4. Origin request contents > Headers 에 리스트 목록에서 **All viewer headers and whitelisted CloudFront-* headers** 를 선택 하고,
 *Choose from the list* 에서 CloudFront-Viewer-Country 검색하여 Add header 버튼을 선택 합니다.
 
-    ![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/aee77239-a4c7-4c6b-8ac1-948e207f3ffd/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/aee77239-a4c7-4c6b-8ac1-948e207f3ffd/Untitled.png)
+    ![lambda-cloudfront-geolocation-originchange_step4 1](https://user-images.githubusercontent.com/47586500/90101912-7eb8a480-dd7a-11ea-997a-faaef472a7f6.png)
 
 5. Create origin request policy 버튼을 선택 합니다.
 
@@ -196,18 +198,18 @@ CloudFront viewer geolocation headers 를 사용하기위해 Origin Request Poli
 2. Behaviors 탭을 선택. Lambda function 을 적용 하기위한 Behavior 를 Edit 합니다.
 3. **Cache and origin request settings** 에서 Use a cache policy and origin request policy 로 선택 합니다.
 
-    ![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/dcba5ac8-1fc2-46da-ad2c-3341eca850fd/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/dcba5ac8-1fc2-46da-ad2c-3341eca850fd/Untitled.png)
+    ![lambda-cloudfront-geolocation-originchange_step4 2 3](https://user-images.githubusercontent.com/47586500/90101913-7f513b00-dd7a-11ea-8c74-d8785462aa39.png)
 
 4. 활성화 된 옵션 메뉴를 아래와 같이 선택 합니다.
 
-    ![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/356dcf74-533d-4f32-bcc3-9fc5efe54d8c/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/356dcf74-533d-4f32-bcc3-9fc5efe54d8c/Untitled.png)
+    ![lambda-cloudfront-geolocation-originchange_step4 2 4](https://user-images.githubusercontent.com/47586500/90101916-7fe9d180-dd7a-11ea-97a8-14aab02dc5ed.png)
 
     - Cache Policy = Managed-CachingDisabled
     - Origin Request Policy = AllViewerHeaders
 
 5. 가장 아래 Lambda Function Associations 을 설정 합니다.
 
-    ![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/27519e11-5111-4e1c-a0d8-cc8a9307221b/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/27519e11-5111-4e1c-a0d8-cc8a9307221b/Untitled.png)
+    ![lambda-cloudfront-geolocation-originchange_step4 2 5](https://user-images.githubusercontent.com/47586500/90101921-80826800-dd7a-11ea-8f41-b8c72dc76a59.png)
 
     - CloudFront Event = Origin Request
     - Lambda Function ARN = *위에서 Publish한 버전의 ARN*
@@ -220,11 +222,11 @@ CloudFront viewer geolocation headers 를 사용하기위해 Origin Request Poli
 
 - 국내(KR) 에서 요청시
 
-    ![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/7a282904-2996-4b21-a1a1-3c2a780285c8/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/7a282904-2996-4b21-a1a1-3c2a780285c8/Untitled.png)
+    ![lambda-cloudfront-geolocation-originchange_step5a](https://user-images.githubusercontent.com/47586500/90101922-811afe80-dd7a-11ea-9426-9e13e2621a53.png)
 
 - 해외에서 요청시
 
-    ![https://s3-us-west-2.amazonaws.com/secure.notion-static.com/9ae15c0c-7cd4-4e7c-b3ec-a08335381734/Untitled.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/9ae15c0c-7cd4-4e7c-b3ec-a08335381734/Untitled.png)
+    ![lambda-cloudfront-geolocation-originchange_step5b](https://user-images.githubusercontent.com/47586500/90101925-81b39500-dd7a-11ea-89a6-c2407216531f.png)
 
 ## Step 6. Resource 삭제
 
