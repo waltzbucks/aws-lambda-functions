@@ -6,12 +6,12 @@ import logging
 import ntpath, mimetypes
 import PIL
 from PIL import Image
-
+import json
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-def image_convert(profile, store_path, filename):
+def image_convert(profile, store_path, filename, convertformat):
     
     logging.info(f"imageConvert::{store_path}")
 
@@ -19,8 +19,15 @@ def image_convert(profile, store_path, filename):
     new_height = profile["height"]
     calc_width = new_width
     calc_height = new_height
-    convert_format = "png"
-    save_path = "/tmp/" + profile["prefix"] + "_" + filename
+    convert_format = convertformat
+    file_name, file_ext = os.path.splitext(filename)
+    
+    if convert_format.lower() == "jpeg":
+        save_format = "jpg"
+    else:
+        save_format = convert_format.lower()
+    
+    save_path = "/tmp/" + profile["prefix"] + "_" + file_name + "." + save_format
     
     try:
         # Image file open
@@ -102,8 +109,11 @@ def image_convert(profile, store_path, filename):
 
 
 def lambda_handler(event, context):
-    
+    # evet by SQS message
     logging.info('lambda_handler:event:{}'.format(event))
+    _body = (event['Records'][0]['body'])
+    event = json.loads(_body)
+    
     sourceS3Key = event['Records'][0]['s3']['object']['key']
     outputS3 = 's3://' + os.environ['DestinationBucket'] + '/' + os.environ['OutputPrefix']
         
@@ -113,7 +123,8 @@ def lambda_handler(event, context):
         "sourceBucket": event['Records'][0]['s3']['bucket']['name'],
         "sourceKey": event['Records'][0]['s3']['object']['key'],
         "tailpath": ntpath.basename(ntpath.split(sourceS3Key)[0]),
-        "filename": os.path.basename(sourceS3Key),        
+        "filename": os.path.basename(sourceS3Key),
+        "convertFormat": os.environ['ImageFormat'],
         "destinationBucket": os.environ['DestinationBucket'],
         "outputPrefix": os.environ['OutputPrefix'],
         'output': outputS3
@@ -142,7 +153,7 @@ def lambda_handler(event, context):
 
         for profile in jobprofiles:
             logging.info(f"lambda_handler:call: imageConvert({profile})")
-            save_path, obj_prefix = image_convert(profile, store_path, Metadata['filename'])
+            save_path, obj_prefix = image_convert(profile, store_path, Metadata["filename"], Metadata["convertFormat"])
 
             # S3 File upload
             # https://boto3.amazonaws.com/v1/documentation/api/latest/guide/s3-uploading-files.html
