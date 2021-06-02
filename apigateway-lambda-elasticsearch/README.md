@@ -31,4 +31,4 @@ AWS API Gateway 서비스를 통해서 Elasticsearch service query 를 전달 �
         sh ./build.sh -b
 
 3. 생성된 zip 파일을 Lambdb function code 에 업로드하여 사용 할 수 있습니다.
-<br>e.g lambda-image-convert-1614911870.zip
+<br>e.g apigateway-lambda-elasticsearch-1614911870.zip
