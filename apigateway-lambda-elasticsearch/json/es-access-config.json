@@ -1,0 +1,9 @@
+{
+  "es_host": "<ELASTICSEARCH-ENDPOINT>",
+  "es_region": "ap-northeast-2",
+  "es_connection_timeout": 60,
+  "es_bulk_timeout": "60s",
+  "es_bulk_chunk_size": 1000,
+  "sts_role_arn": "<LAMBDA-IAM-ROLE-ARN>",
+  "sts_session_name": "lambdastsassume"
+}
