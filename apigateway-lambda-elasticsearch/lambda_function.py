@@ -64,14 +64,14 @@ def write_bulk(record_set, es_client, config):
 
 def datascan(es_client,event):
     logging.info("search the data to ES")
-    logging.info("ES Client=" + es_client)
-    logging.info("Event=" + event)
+    logging.info("ES Client=" + str(es_client))
+    logging.info("Event=" + str(event))
     
     searchquery = queries(event)
     resp = helpers.scan(es_client,
                         # query={"query": {"match": {"_id": "TvyPpnkBkZlE89-bOEMP"}}},
                         query={"query": {"match": searchquery}},
-                        index="kibana_sample_data*")
+                        index="cloudaffairempldb*")
     
     results_list = []
     for hit in resp:
@@ -85,7 +85,7 @@ def queries(event):
     # TODO: search query processing
     searchquery = event
     
-    logging.info("search query=" + event)
+    logging.info("search query=" + str(searchquery))
     
     return searchquery
     
@@ -107,6 +107,6 @@ def lambda_handler(event, context):
                               connection_class=RequestsHttpConnection)
     
     resp = json.dumps(datascan(es_client,event))
-    logging.info("Return=" + resp)
+    logging.info("Return=" + str(resp))
     
     return resp
