@@ -2,6 +2,9 @@
 
 AWS API Gateway 서비스를 통해서 Elasticsearch service query 를 전달 하는 샘플 코드 입니다.
 
+
+![image](https://user-images.githubusercontent.com/47586500/120410034-2f854400-c38d-11eb-96d6-d0841529b968.png)
+
 # Getting start
 ## Requirements
 * git 이 필요 합니다.
