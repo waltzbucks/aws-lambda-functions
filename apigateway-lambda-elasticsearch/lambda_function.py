@@ -68,26 +68,39 @@ def datascan(es_client,event):
     logging.info("Event=" + str(event))
     
     searchquery = queries(event)
-    resp = helpers.scan(es_client,
-                        # query={"query": {"match": {"_id": "TvyPpnkBkZlE89-bOEMP"}}},
-                        query={"query": {"match": searchquery}},
+    resp = helpers.scan(client=es_client,
+                        query=searchquery,
                         index="cloudaffairempldb*")
     
     results_list = []
+
     for hit in resp:
-        print(hit)
+        
         results_list.append(hit["_source"])
     
     return results_list
 
 def queries(event):
     
-    # TODO: search query processing
-    searchquery = event
+    # Search query processing
+    param_queries = event["queryStringParameters"]
     
-    logging.info("search query=" + str(searchquery))
+    if "q" in param_queries:
+        query = {
+            "size": 5,
+            "query": {
+                "query_string": {
+                "query": param_queries["q"]
+                }
+            }
+        }
     
-    return searchquery
+    else:
+        query = {"query": {"match": param_queries }}
+    
+    logging.info("search query=" + str(query))
+    
+    return query
     
     
 def lambda_handler(event, context):
@@ -105,8 +118,18 @@ def lambda_handler(event, context):
                               http_auth=sts_auth(config),
                               timeout=config['es_connection_timeout'],
                               connection_class=RequestsHttpConnection)
+    try:
+        resp = json.dumps(datascan(es_client,event))
+        logging.info("Return=" + str(resp))
+        
+        return {
+            "statusCode": "200",
+            "body": resp
+        }
+        
+    except:
+        return {
+            "statusCode": "500"
+        }
     
-    resp = json.dumps(datascan(es_client,event))
-    logging.info("Return=" + str(resp))
     
-    return resp
