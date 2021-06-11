@@ -181,8 +181,6 @@ Lambda function 에서 각 서비스로 접근이 필요한 권한을 위한 Rol
 
 ## 3. Amazon Elasticsearch service
 
----
-
 해당 문서에서는 Amazon Elasticsearch service domain 으로 openapisearch 를 예제로 사용 합니다.
 
 ### 3.1.  Prerequisite
@@ -306,8 +304,6 @@ curl -u handsonlab:Goswm5\!ab -XGET "https://$AWS_ES_ENDPOINT/cloudaffairempldb/
 
 ## 4. Lambda function
 
----
-
 ### 4.1. Build
 
 4.1.1. Clone
@@ -366,8 +362,6 @@ curl -u handsonlab:Goswm5\!ab -XGET "https://$AWS_ES_ENDPOINT/cloudaffairempldb/
     ```
 
 ## 5. API Gateway
-
----
 
 ### 5.1.  REST API 를 생성
 
@@ -529,8 +523,6 @@ Deploy stage "prod" 로 배포 합니다
     ```
 
 ## 6. API-Key 사용
-
----
 
 X-API-Key 헤더를 이용한 인증키 사용 설정을 합니다.
 
